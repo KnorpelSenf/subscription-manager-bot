@@ -47,7 +47,6 @@ async function getSheetToken(): Promise<string | null | undefined> {
 }
 
 async function newUser(message: Message.TextMessage): Promise<void> {
-    const email = message.text.substr('/start'.length).trim()
     const token = await getSheetToken()
     if (token) {
         const range = await google.sheets('v4').spreadsheets.values.get({
@@ -57,24 +56,26 @@ async function newUser(message: Message.TextMessage): Promise<void> {
         })
         const emails = range.data.values
 
+        const emailCode = message.text.substr('/start'.length).trim()
+        const email = Buffer.from(emailCode, 'base64').toString('ascii')
         if (
             emails &&
             emails.some(row => row[0] === email && row[1] === 'TRUE')
         ) {
             apiCall('sendMessage', {
                 chat_id: message.chat.id,
-                text: "You're in!",
+                text: `You're in with ${email}!`,
             })
         } else {
             apiCall('sendMessage', {
                 chat_id: message.chat.id,
-                text: "You're out!",
+                text: `You're out with ${email}!`,
             })
         }
     } else {
         apiCall('sendMessage', {
             chat_id: message.chat.id,
-            text: `Something went wrong on our end, sorry!`,
+            text: 'Something went wrong on our end, sorry!',
         })
     }
 }
@@ -88,6 +89,7 @@ function verifyMembers(message: Message.NewChatMembersMessage): void {
 
 export async function bot(req: Request, res: Response): Promise<void> {
     const update: Update = req.body
+    console.log('UPDATE DATA', update)
     if ('message' in update) {
         const message = update.message
         if ('text' in message && message.text.startsWith('/start')) {
@@ -95,12 +97,6 @@ export async function bot(req: Request, res: Response): Promise<void> {
         } else if ('new_chat_members' in message) {
             verifyMembers(message)
         }
-
-        const id = update.message.from.id
-        apiCall('sendMessage', {
-            chat_id: id,
-            text: 'Hi, your user ID is ' + id,
-        })
     }
     res.end()
 }
