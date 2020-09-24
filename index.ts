@@ -46,36 +46,68 @@ async function getSheetToken(): Promise<string | null | undefined> {
     return jwt.credentials.access_token
 }
 
-async function newUser(message: Message.TextMessage): Promise<void> {
-    const token = await getSheetToken()
-    if (token) {
-        const range = await google.sheets('v4').spreadsheets.values.get({
-            spreadsheetId: sheetId,
-            oauth_token: token,
-            range: 'A2:C',
-        })
-        const emails = range.data.values
+type SpreadsheetRow = [string, 'TRUE' | 'FALSE', number | undefined]
 
-        const emailCode = message.text.substr('/start'.length).trim()
-        const email = Buffer.from(emailCode, 'base64').toString('ascii')
-        if (
-            emails &&
-            emails.some(row => row[0] === email && row[1] === 'TRUE')
-        ) {
-            apiCall('sendMessage', {
-                chat_id: message.chat.id,
-                text: `You're in with ${email}!`,
-            })
-        } else {
-            apiCall('sendMessage', {
-                chat_id: message.chat.id,
-                text: `You're out with ${email}!`,
-            })
-        }
-    } else {
+async function newUser(message: Message.TextMessage): Promise<void> {
+    const chat_id = message.chat.id
+    const token = await getSheetToken()
+    if (!token) {
         apiCall('sendMessage', {
-            chat_id: message.chat.id,
+            chat_id,
             text: 'Something went wrong on our end, sorry!',
+        })
+        return
+    }
+    const s = google.sheets('v4').spreadsheets
+
+    const range = await s.values.get({
+        spreadsheetId: sheetId,
+        oauth_token: token,
+        range: 'A2:C',
+    })
+    const emails = range.data.values as SpreadsheetRow[] | undefined
+    if (!emails) {
+        apiCall('sendMessage', {
+            chat_id,
+            text:
+                'Your message is missing an email! Please start this bot by clicking the link you received.',
+        })
+        return
+    }
+
+    const emailCode = message.text.substr('/start'.length).trim()
+    const email = Buffer.from(emailCode, 'base64').toString('ascii')
+    const index = emails.findIndex(row => row[0] === email && row[1] === 'TRUE')
+    if (index === -1) {
+        apiCall('sendMessage', {
+            chat_id,
+            text: `Sorry! You're out with ${email}!`,
+        })
+        return
+    }
+
+    const row = emails[index]
+    if (row[2]) {
+        apiCall('sendMessage', {
+            chat_id,
+            text: `You're already registered with ${email}!`,
+        })
+    } else {
+        const range = 'C' + (index + 2)
+        await s.values.update({
+            spreadsheetId: sheetId,
+            range,
+            valueInputOption: 'RAW',
+            oauth_token: token,
+            requestBody: {
+                range,
+                majorDimension: 'ROWS',
+                values: [[chat_id]],
+            },
+        })
+        apiCall('sendMessage', {
+            chat_id,
+            text: `Welcome! You're in with ${email}!`,
         })
     }
 }
@@ -92,7 +124,11 @@ export async function bot(req: Request, res: Response): Promise<void> {
     console.log('UPDATE DATA', update)
     if ('message' in update) {
         const message = update.message
-        if ('text' in message && message.text.startsWith('/start')) {
+        if (
+            'text' in message &&
+            message.chat.type === 'private' &&
+            message.text.startsWith('/start')
+        ) {
             await newUser(message)
         } else if ('new_chat_members' in message) {
             verifyMembers(message)
