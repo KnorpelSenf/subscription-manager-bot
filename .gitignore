@@ -31,6 +31,9 @@ coverage
 # Bower dependency directory (https://bower.io/)
 bower_components
 
+# TypeScript incremental builds file
+tsconfig.tsbuildinfo
+
 # node-waf configuration
 .lock-wscript
 
