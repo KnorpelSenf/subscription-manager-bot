@@ -1,9 +1,8 @@
 import type { Request, Response } from 'express'
-import * as https from 'https'
-import type { Message, Opts, Telegram, Update } from 'typegram'
-import { readFileSync } from 'fs'
-import { google } from 'googleapis'
 import { JWT } from 'google-auth-library'
+import { google } from 'googleapis'
+import { request } from 'https'
+import type { Message, Opts, Telegram, Update } from 'typegram'
 
 const GOOGLE_AUTH_SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
@@ -17,7 +16,7 @@ if (!botToken || !sheetId) {
 // quickly implement telegram integration to reduce the number of dependencies
 function apiCall<M extends keyof Telegram>(method: M, payload: Opts<M>): void {
     const data = JSON.stringify(payload)
-    const req = https.request({
+    const req = request({
         hostname: 'api.telegram.org',
         path: '/bot' + botToken + '/' + method,
         method: 'POST',
@@ -35,13 +34,13 @@ function apiCall<M extends keyof Telegram>(method: M, payload: Opts<M>): void {
 let jwt: JWT | undefined = undefined
 async function getSheetToken(): Promise<string | null | undefined> {
     if (jwt === undefined) {
-        const content = readFileSync('./credentials.json').toString()
-        const credentials = JSON.parse(content)
-        jwt = new JWT({
-            email: credentials.client_email,
-            key: credentials.private_key,
-            scopes: GOOGLE_AUTH_SCOPES,
-        })
+        const email = process.env.SHEET_CLIENT_EMAIL
+        const key = process.env.SHEET_PRIVATE_KEY
+        if (!email || !key) {
+            console.log('No sheet auth set!')
+            return undefined
+        }
+        jwt = new JWT({ email, key, scopes: GOOGLE_AUTH_SCOPES })
         await jwt.authorize()
     }
     return jwt.credentials.access_token
