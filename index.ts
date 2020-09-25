@@ -140,6 +140,11 @@ async function newUser(message: Message.TextMessage): Promise<void> {
         return
     }
 
+    await apiCall('unbanChatMember', {
+        chat_id: insiderChatId,
+        user_id: chat_id,
+    })
+
     const row = emails[index]
     const reply_markup = await getInviteReplyMarkup()
     if (row[2]) {
