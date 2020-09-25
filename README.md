@@ -1,2 +1,2 @@
 # subscription-manager-bot
-Telegram Bot to restrict channel member to paying customers
+Telegram Bot to restrict channel members to paying customers.
