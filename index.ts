@@ -143,7 +143,8 @@ async function newUser(message: Message.TextMessage): Promise<void> {
     await apiCall('unbanChatMember', {
         chat_id: insiderChatId,
         user_id: chat_id,
-    })
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+    }).catch(() => {})
 
     const row = emails[index]
     const reply_markup = await getInviteReplyMarkup()
