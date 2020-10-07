@@ -113,6 +113,7 @@ async function newUser(message: Message.TextMessage): Promise<void> {
     const chat_id = message.chat.id
     const s = google.sheets('v4').spreadsheets
 
+    // check if we can use sheet
     const token = await getSheetToken()
     if (!token) {
         await apiCall('sendMessage', {
@@ -123,6 +124,7 @@ async function newUser(message: Message.TextMessage): Promise<void> {
         return
     }
 
+    // check if we can access the email addresses in it
     const range = await s.values.get({
         spreadsheetId: sheetId,
         oauth_token: token,
@@ -138,10 +140,10 @@ async function newUser(message: Message.TextMessage): Promise<void> {
         return
     }
 
+    // check if the provided email belongs to a paying customer
     const emailCode = message.text.substr('/start'.length).trim()
     const email = Buffer.from(emailCode, 'base64').toString('ascii')
     const index = emails.findIndex(row => row[0] === email && row[1] === 'TRUE')
-
     if (index === -1) {
         await apiCall('sendMessage', {
             chat_id,
@@ -150,6 +152,20 @@ async function newUser(message: Message.TextMessage): Promise<void> {
         return
     }
 
+    // check if that customer has not linked a different account before
+    const existingTelegramUserId = parseInt(emails[index][2] ?? '', 10)
+    const isExistingUser = !isNaN(existingTelegramUserId)
+    if (isExistingUser && existingTelegramUserId !== chat_id) {
+        await apiCall('sendMessage', {
+            chat_id,
+            text:
+                "You're already registered with a different Telegram account!",
+        })
+        return
+    }
+
+    // all checks done, we can now send the invitation link!
+
     await apiCall('unbanChatMember', {
         chat_id: insiderChatId,
         user_id: chat_id,
@@ -157,16 +173,11 @@ async function newUser(message: Message.TextMessage): Promise<void> {
         // could fail if member is admin, then just do nothing
     })
 
-    const existingEmail = emails[index][2]
     const reply_markup = await getInviteReplyMarkup()
 
     let text: string
-    if (existingEmail) {
-        if (existingEmail === email) {
-            text = "You're already registered!"
-        } else {
-            text = "You're already registered with a different email!"
-        }
+    if (isExistingUser) {
+        text = "You're already registered!"
     } else {
         const range = 'C' + (index + 2)
         await s.values.update({
