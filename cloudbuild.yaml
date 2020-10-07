@@ -52,7 +52,7 @@ steps:
           [
               'functions',
               'deploy',
-              'register-${_FUNCTION_NAME}',
+              'register',
               '--trigger-http',
               '--runtime',
               'nodejs12',
