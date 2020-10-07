@@ -153,17 +153,20 @@ async function newUser(message: Message.TextMessage): Promise<void> {
     await apiCall('unbanChatMember', {
         chat_id: insiderChatId,
         user_id: chat_id,
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-    }).catch(() => {})
+    }).catch(() => {
+        // could fail if member is admin, then just do nothing
+    })
 
-    const row = emails[index]
+    const existingEmail = emails[index][2]
     const reply_markup = await getInviteReplyMarkup()
-    if (row[2]) {
-        await apiCall('sendMessage', {
-            chat_id,
-            text: "You're already registered!",
-            reply_markup,
-        })
+
+    let text: string
+    if (existingEmail) {
+        if (existingEmail === email) {
+            text = "You're already registered!"
+        } else {
+            text = "You're already registered with a different email!"
+        }
     } else {
         const range = 'C' + (index + 2)
         await s.values.update({
@@ -177,12 +180,10 @@ async function newUser(message: Message.TextMessage): Promise<void> {
                 values: [[chat_id]],
             },
         })
-        await apiCall('sendMessage', {
-            chat_id,
-            text: "Welcome! You're in!",
-            reply_markup,
-        })
+        text = "Welcome! You're in!"
     }
+
+    await apiCall('sendMessage', { chat_id, text, reply_markup })
 }
 
 // +++ New user joins insider chat +++
