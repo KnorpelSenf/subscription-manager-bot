@@ -74,6 +74,18 @@ async function getSheetToken(): Promise<string | null | undefined> {
     return jwt.credentials.access_token
 }
 
+// [[[ REDIRECT TO BOT CLOUD FUNCTION ]]]
+
+export async function register(req: Request, res: Response): Promise<void> {
+    const { email } = req.query
+    const emailCode = Buffer.from(email?.toString() ?? '', 'ascii').toString(
+        'base64'
+    )
+    const me = await apiCall('getMe', {})
+    console.log(email, emailCode)
+    res.redirect('https://telegram.me/' + me.username + '?start=' + emailCode)
+}
+
 // [[[ BOT CLOUD FUNCTION ]]]
 
 type SpreadsheetRow = [string, 'TRUE' | 'FALSE', string | undefined]

@@ -46,3 +46,23 @@ steps:
               'BOT_TOKEN=${_BOT_TOKEN},SHEET_ID=${_SHEET_ID},SHEET_CLIENT_EMAIL=${_SHEET_CLIENT_EMAIL},SHEET_PRIVATE_KEY=${_SHEET_PRIVATE_KEY},INSIDER_CHAT_ID=${_INSIDER_CHAT_ID}',
           ]
       dir: '.'
+
+    - name: 'gcr.io/cloud-builders/gcloud'
+      args:
+          [
+              'functions',
+              'deploy',
+              'register-${_FUNCTION_NAME}',
+              '--trigger-http',
+              '--runtime',
+              'nodejs12',
+              '--region',
+              'europe-west3',
+              '--entry-point',
+              'register',
+              '--memory',
+              '128MB',
+              '--set-env-vars',
+              'BOT_TOKEN=${_BOT_TOKEN},SHEET_ID=${_SHEET_ID},SHEET_CLIENT_EMAIL=${_SHEET_CLIENT_EMAIL},SHEET_PRIVATE_KEY=${_SHEET_PRIVATE_KEY},INSIDER_CHAT_ID=${_INSIDER_CHAT_ID}',
+          ]
+      dir: '.'
