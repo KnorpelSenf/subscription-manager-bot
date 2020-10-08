@@ -82,7 +82,7 @@ One is responsible for the the payload generation and redirect, one is responsib
 
 The easiest way to deploy this project is to
 
-1. create a Google Cloud Source Repository that mirrors this repo,
+1. create a Google Cloud Source Repository that mirrors a fork of this repo,
 2. create a build trigger with the configuration below in Google Cloud Build, and
 3. manually run the trigger.
 
