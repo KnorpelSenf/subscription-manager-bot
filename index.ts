@@ -258,7 +258,7 @@ async function getInviteReplyMarkup(): Promise<InlineKeyboardMarkup> {
         'invite_link' in chat && chat.invite_link !== undefined
             ? chat.invite_link
             : await apiCall('exportChatInviteLink', { chat_id: insiderChatId })
-    return { inline_keyboard: [[{ text: 'Trading Ideen erhalten', url }]] }
+    return { inline_keyboard: [[{ text: 'Trading-Ideen erhalten', url }]] }
 }
 
 // [[[ CANCEL SUBSCRIPTION CLOUD FUNCTION ]]]
