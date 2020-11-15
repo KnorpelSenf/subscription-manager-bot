@@ -100,14 +100,15 @@ Here is how you have to configure the trigger:
 
 These substitution variables have to be set:
 
-| Variable              | What to put in value                                                                                                                                           |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `_BOT_TOKEN`          | The token you obtained from [@BotFather](https://t.me/BotFather) when you created your Telegram bot                                                            |
-| `_FUNCTION_NAME`      | A long ID to use as base URL for the bot webhook and the subscription cancellation endpoint (it makes sense to use the bot token with `-` instead of `:` here) |
-| `_INSIDER_CHAT_ID`    | The chat ID of your secret Telegram chat (make sure the bot is an admin member of it so it can kick and ban people)                                            |
-| `_SHEET_ID`           | The ID of the Google Sheet (can be found in the URL, just google how to obtain it)                                                                             |
-| `_SHEET_CLIENT_EMAIL` | A service account email from your IAM that is used to modify your Google Sheet (make sure this account has edit permissions to the spreadsheet)                |
-| `_SHEET_PRIVATE_KEY`  | The private key to the service account so that the system can authenticate itself in order to access the Google Sheet                                          |
+| Variable                  | What to put in value                                                                                                                                           |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `_BOT_TOKEN`              | The token you obtained from [@BotFather](https://t.me/BotFather) when you created your Telegram bot                                                            |
+| `_FUNCTION_NAME`          | A long ID to use as base URL for the bot webhook and the subscription cancellation endpoint (it makes sense to use the bot token with `-` instead of `:` here) |
+| `_REGISTER_FUNCTION_NAME` | Any name for the register cloud function (e.g. `'register'`), will be exposed to user so it makes sense **not** to use the bot token here                      |
+| `_INSIDER_CHAT_ID`        | The chat ID of your secret Telegram chat (make sure the bot is an admin member of it so it can kick and ban people)                                            |
+| `_SHEET_ID`               | The ID of the Google Sheet (can be found in the URL, just google how to obtain it)                                                                             |
+| `_SHEET_CLIENT_EMAIL`     | A service account email from your IAM that is used to modify your Google Sheet (make sure this account has edit permissions to the spreadsheet)                |
+| `_SHEET_PRIVATE_KEY`      | The private key to the service account so that the system can authenticate itself in order to access the Google Sheet                                          |
 
 The Google Sheet is expected to have (at least) three columns.
 They can have any title in the first row.

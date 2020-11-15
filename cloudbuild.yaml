@@ -54,7 +54,7 @@ steps:
           [
               'functions',
               'deploy',
-              'register',
+              '${_REGISTER_FUNCTION_NAME}',
               '--trigger-http',
               '--allow-unauthenticated',
               '--runtime',
