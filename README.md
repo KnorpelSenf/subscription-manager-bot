@@ -131,11 +131,25 @@ In summary, it could look like this:
 | bob@gmail.com            | `FALSE`              | 67890                               |
 | eve@gmail.com            | `TRUE`               |                                     |
 
-Remember to set the cloud function URL as the webhook for the Telegram bot!
-This can be done by calling [this method](https://core.telegram.org/bots/api#setwebhook).
-
 If you want to specify `allowed_updates` to reduce the number of invocations of your Cloud Function, make sure to include at least the update type `message`.
 All other updates are ignored by the bot.
+
+### Integration with Your System
+
+Your system obviously has to modify the Google Sheet as described above.
+
+Apart from that, the two URLs your system has to use look as follows.
+
+**Registration URL:** `https://<region and project>.cloudfunctions.net/<value of _REGISTER_FUNCTION_NAME>?email=<customer's email to register>`
+
+**Cancel URL:** `https://<region and project>.cloudfunctions.net/end-subscription-<value of _FUNCTION_NAME>` with this body: `{ "email": "<email of customer that cancelled subscription>" }`
+This URL has to be kept inaccessible from customers, or else they could cancel subscriptions of other customers and potentially also take over your bot.
+
+You should be able to see both URLs with their respective values in the Google Cloud Console.
+
+**Remember to set the cloud function URL as the webhook for the Telegram bot!**
+This is not done automatically for you.
+You can do it manually by calling [this method](https://core.telegram.org/bots/api#setwebhook).
 
 ## The Rest
 
